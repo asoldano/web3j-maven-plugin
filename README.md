@@ -1,3 +1,8 @@
+# What's this ?
+
+This is a custom patched version of web3j maven plugin that allows consuming Solidity contracts importing each others. It also relies on web3j 3.0.20 and has been tested with Solidity 0.4.18 compiler installed built from sources and installed locally (Fedora).
+Below is the official documentation. 
+
 # web3j-maven-plugin
 [![Build Status](https://travis-ci.org/web3j/web3j-maven-plugin.svg?branch=master)](https://travis-ci.org/web3j/web3j-maven-plugin)
 [![codecov.io](https://codecov.io/github/web3j/web3j-maven-plugin/coverage.svg?branch=master)](https://codecov.io/github/web3j/web3j-maven-plugin?branch=master)

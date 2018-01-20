@@ -4,6 +4,7 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,6 +43,40 @@ public class SolidityCompiler {
         return INSTANCE;
     }
 
+    public CompilerResult compileSrcFile(
+            File sourceFile, SolidityCompiler.Options... options) {
+
+
+        boolean success = false;
+        String error;
+        String output;
+        Process process;
+
+        try {
+            process = (solc != null)
+                    ? getSolCProcessFromLibrary(options)
+                    : getSolCProcessFromSystem(options, sourceFile.getAbsolutePath());
+
+            ParallelReader errorReader = new ParallelReader(process.getErrorStream());
+            ParallelReader outputReader = new ParallelReader(process.getInputStream());
+            errorReader.start();
+            outputReader.start();
+
+            success = process.waitFor() == 0;
+            error = errorReader.getContent();
+            output = outputReader.getContent();
+
+        } catch (IOException | InterruptedException e) {
+            StringWriter errorWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(errorWriter));
+            error = errorWriter.toString();
+            output = "";
+        }
+
+        String dir = sourceFile.getAbsoluteFile().getParent();
+        return new CompilerResult(dir, error, output, success);
+    }
+    
     public CompilerResult compileSrc(
             byte[] source, SolidityCompiler.Options... options) {
 
@@ -96,6 +131,15 @@ public class SolidityCompiler {
     private Process getSolCProcessFromSystem(Options[] options) throws IOException {
         Process process;
         List<String> commandParts = prepareCommandOptions("solc", options);
+        process = Runtime.getRuntime().exec(commandParts.toArray(new String[commandParts.size()]));
+        return process;
+    }
+
+    private Process getSolCProcessFromSystem(Options[] options, String filename) throws IOException {
+        Process process;
+        List<String> commandParts = prepareCommandOptions("solc", options);
+        commandParts.add("--bin");
+        commandParts.add(filename);
         process = Runtime.getRuntime().exec(commandParts.toArray(new String[commandParts.size()]));
         return process;
     }
@@ -179,6 +223,10 @@ public class SolidityCompiler {
                         return null;
                     }
                 }
+            }
+            int idx = content.indexOf("=======");
+            if (idx > 0) {
+            	content = content.substring(0, idx - 1);
             }
             return content;
         }

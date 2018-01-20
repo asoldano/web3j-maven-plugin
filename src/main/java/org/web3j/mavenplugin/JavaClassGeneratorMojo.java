@@ -14,8 +14,6 @@ import org.web3j.mavenplugin.solidity.SolidityCompiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 
@@ -105,25 +103,21 @@ public class JavaClassGeneratorMojo extends AbstractMojo {
     }
 
     private String parseSoliditySource(String includedFile) throws MojoExecutionException {
-        try {
-            byte[] contract = Files.readAllBytes(Paths.get(soliditySourceFiles.getDirectory(), includedFile));
-            CompilerResult result = SolidityCompiler.getInstance(getLog()).compileSrc(
-                    contract,
-                    SolidityCompiler.Options.ABI,
-                    SolidityCompiler.Options.BIN,
-                    SolidityCompiler.Options.INTERFACE,
-                    SolidityCompiler.Options.METADATA
-            );
-            if (result.isFailed()) {
-                throw new MojoExecutionException("Could not compile solidity files\n" + result.errors);
-            }
-
-            getLog().debug("\t\tResult:\t" + result.output);
-            getLog().debug("\t\tError: \t" + result.errors);
-            return result.output;
-        } catch (IOException ioException) {
-            throw new MojoExecutionException("Could not compile files", ioException);
+    	File contract = new File(soliditySourceFiles.getDirectory(), includedFile);
+        CompilerResult result = SolidityCompiler.getInstance(getLog()).compileSrcFile(
+                contract,
+                SolidityCompiler.Options.ABI,
+                SolidityCompiler.Options.BIN,
+                SolidityCompiler.Options.INTERFACE,
+                SolidityCompiler.Options.METADATA
+        );
+        if (result.isFailed()) {
+            throw new MojoExecutionException("Could not compile solidity files\n" + result.errors);
         }
+
+        getLog().debug("\t\tResult:\t" + result.output);
+        getLog().debug("\t\tError: \t" + result.errors);
+        return result.output;
     }
 
     private void generatedJavaClass(Map<String, Map<String, String>> result, String contractName) throws IOException, ClassNotFoundException {
