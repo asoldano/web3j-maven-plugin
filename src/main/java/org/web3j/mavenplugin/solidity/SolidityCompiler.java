@@ -44,7 +44,7 @@ public class SolidityCompiler {
     }
 
     public CompilerResult compileSrcFile(
-            File sourceFile, SolidityCompiler.Options... options) {
+            File sourceFile, File dir, SolidityCompiler.Options... options) {
 
 
         boolean success = false;
@@ -73,7 +73,7 @@ public class SolidityCompiler {
             output = "";
         }
 
-        String dir = sourceFile.getAbsoluteFile().getParent();
+//        String dir = sourceFile.getAbsoluteFile().getParent();
         return new CompilerResult(dir, error, output, success);
     }
     
@@ -138,6 +138,7 @@ public class SolidityCompiler {
     private Process getSolCProcessFromSystem(Options[] options, String filename) throws IOException {
         Process process;
         List<String> commandParts = prepareCommandOptions("solc", options);
+        commandParts.add("=");
         commandParts.add("--bin");
         commandParts.add(filename);
         process = Runtime.getRuntime().exec(commandParts.toArray(new String[commandParts.size()]));

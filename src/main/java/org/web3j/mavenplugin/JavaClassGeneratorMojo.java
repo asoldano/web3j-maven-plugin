@@ -106,6 +106,7 @@ public class JavaClassGeneratorMojo extends AbstractMojo {
     	File contract = new File(soliditySourceFiles.getDirectory(), includedFile);
         CompilerResult result = SolidityCompiler.getInstance(getLog()).compileSrcFile(
                 contract,
+                new File(soliditySourceFiles.getDirectory()),
                 SolidityCompiler.Options.ABI,
                 SolidityCompiler.Options.BIN,
                 SolidityCompiler.Options.INTERFACE,
